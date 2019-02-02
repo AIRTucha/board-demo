@@ -6,6 +6,9 @@ import Task exposing (attempt)
 import List exposing (map, map2)
 import Front.Utils exposing(..)
 
+
+{-|
+-}
 main : Program Never Model Msg
 main =
   let 
@@ -26,20 +29,25 @@ main =
       }
 
 
--- MODEL
 
+{-|
+-}
 type alias Model =
   { local: Entry 
   , db: Entry
   }
 
 
+{-|
+-}
 type alias Entry =
   { input: String 
   , value: String
   }
 
 
+{-|
+-}
 model : Model
 model =
   { local = 
@@ -53,8 +61,8 @@ model =
   }
 
 
--- UPDATE
-
+{-|
+-}
 type Msg
   = HandleLocalInput String
   | HandleLocalResponse String
@@ -63,6 +71,8 @@ type Msg
   | Send (String -> Msg) (Http.Request String) 
 
 
+{-|
+-}
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
@@ -118,9 +128,8 @@ update msg model =
       (model, send (handleSession handler) req )
 
 
--- VIEW
-
-
+{-|
+-}
 view : Model -> Html Msg
 view model =
   let 

@@ -7,16 +7,22 @@ import Html.Events exposing (onInput, onClick)
 import Http exposing (request, expectString, stringBody)
 
 
+{-|
+-}
 localPath : String
 localPath =
   "/save/local"
 
 
+{-|
+-}
 dbPath : String
 dbPath =
   "/save/db"
 
 
+{-|
+-}
 handleSession : (String -> a) -> Result b String -> a
 handleSession hanlder result =
   case result of 
@@ -28,6 +34,8 @@ handleSession hanlder result =
         |> \_ -> hanlder "No session"
 
 
+{-|
+-}
 makeRow : (String -> msg) -> msg -> String -> Html msg
 makeRow handleInput saveInput value =
   tr []
@@ -37,6 +45,8 @@ makeRow handleInput saveInput value =
     ]
 
 
+{-|
+-}
 postSession : (Http.Request String -> a) -> String -> String -> a
 postSession handler str url  =
     { method = "POST"
@@ -51,6 +61,8 @@ postSession handler str url  =
       |> handler
 
 
+{-|
+-}
 spreadTuple: (a -> b -> c) -> (a, b) -> c
 spreadTuple fun (handler, task) =
   fun handler task

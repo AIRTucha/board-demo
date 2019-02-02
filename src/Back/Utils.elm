@@ -11,6 +11,12 @@ import Board.Internals exposing (..)
 
 {-|
 -}
+type alias Model =
+    Dict String String
+
+{-|
+-}
+saveSessions : ( Model, a ) -> Task.Task String a
 saveSessions (model, res) =
     model 
         |> File.fromDict
@@ -20,6 +26,7 @@ saveSessions (model, res) =
 
 {-|
 -}
+getSession : b -> Request a -> Model -> AnswerValue value model error
 getSession param req model =
     let 
         sessionTag = 
@@ -34,6 +41,7 @@ getSession param req model =
 
 {-|
 -}
+putSession : b -> Request String -> Model -> ( Model, AnswerValue a model error )
 putSession param req model =
     let 
         sessionTag = 
@@ -60,6 +68,7 @@ putSession param req model =
 
 {-|
 -}    
+getSessionTag : Request a -> Model -> String
 getSessionTag req model =
     case Dict.get "session" req.cookies of
         Just oldSessionTag ->
@@ -71,6 +80,7 @@ getSessionTag req model =
 
 {-|
 -}
+addCookeis : String -> String -> Response a -> Response a
 addCookeis name value res =
     let 
         cookei str = 
@@ -109,6 +119,7 @@ getFile path (param, req)  =
 
 {-|
 -}
+makeTextResponse : Request a -> String -> Response b
 makeTextResponse req text = 
     let 
         res = getResponse req

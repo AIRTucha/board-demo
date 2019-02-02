@@ -1,15 +1,13 @@
 {
-  "name": "boardseed",
-  "version": "0.0.1",
+  "name": "board-demos",
+  "version": "1.0.0",
   "description": "Seed project for full-stack Elm application based on Board ",
   "main": "local.js",
   "scripts": {
     "start": "nodemon --exec \"npm run back && npm run front && node local.js\"",
     "front": "elm make src/front/app.elm --output public/app.js",
     "back": "elm make src/back/app.elm --output=dist/app.js",
-    "install": "elm-install install",
-    "add": "elm package install",
-    "elm": "elm"
+    "install": "elm-install install"
   },
   "author": "airtucha",
   "license": "MIT",
