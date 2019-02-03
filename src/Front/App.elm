@@ -12,6 +12,7 @@ import Front.Utils exposing(..)
 main : Program Never Model Msg
 main =
   let 
+    -- Request inital state
     getSession = 
       [ getString localPath
       , getString dbPath
@@ -27,38 +28,6 @@ main =
       , update = update
       , subscriptions = \ _ -> Sub.none
       }
-
-
-
-{-| Define the application state
--}
-type alias Model =
-    { local: Entry 
-    , db: Entry
-    }
-
-
-{-| Define state for single component of the app
--}
-type alias Entry =
-    { input: String 
-    , value: String
-    }
-
-
-{-| Initial state of the application
--}
-model : Model
-model =
-    { local = 
-        { input = ""
-        , value = "Wait status"
-        }
-    , db =
-        { input = ""
-        , value = "Wait status"
-        }
-    }
 
 
 {-| Internal msg of the application life circle

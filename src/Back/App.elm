@@ -66,7 +66,7 @@ main = board router config subPort
 -}
 router : Request String -> Mode String (Answer String State String)
 router =
-    -- Defult router prints requests with specified prefix as default actions
+    -- Default router prints requests with specified prefix as default actions
     logger "Request"
         -- Synchronously handle GET request to "/save/local",
         -- check local state for a value based on session cookei
@@ -84,10 +84,10 @@ router =
         -- Reply with "./public/index.html"
         |> get (p "/") getIndex
         -- statically serve files from "./public/"
-        |> static (p "") "./public/"
-        -- Asynchronously redirect "/index.html" to "/"
-        |> get (p "/index.html") defaultRedirect
-        -- Follback, match to any path, take entire unhandled address,
+        |> static any "./public/"
+        -- Asynchronously redirect "/index" to "/"
+        |> get (p "/index") (\ _ -> succeed << Redirect <| "/")
+        -- Fallback, match to any path, take entire unhandled address,
         -- Reply with a string value which specifies that the path does not exist
         |> getSync str getInvalid
 
@@ -131,15 +131,6 @@ postSessionDB (param, req)  =
 getIndex : ( b, Request a ) -> Task String (AnswerValue value state error)
 getIndex =
     getFile "./public/index.html" 
-
-
-{-| Path handler, asynchronously redirect to "/" path
--}
-defaultRedirect : a -> Task.Task x (AnswerValue value model error)
-defaultRedirect _ =
-    "/"
-        |> Redirect
-        |> Task.succeed
 
 
 {-| Path handler, exclude string from path and reply that it does not exist

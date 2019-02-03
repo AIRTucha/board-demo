@@ -6,6 +6,37 @@ import Html.Events exposing (onInput, onClick)
 import Http exposing (request, expectString, stringBody)
 
 
+{-| Define the application state
+-}
+type alias Model =
+    { local: Entry 
+    , db: Entry
+    }
+
+
+{-| Define state for single component of the app
+-}
+type alias Entry =
+    { input: String 
+    , value: String
+    }
+
+
+{-| Initial state of the application
+-}
+model : Model
+model =
+    { local = 
+        { input = ""
+        , value = "Wait status"
+        }
+    , db =
+        { input = ""
+        , value = "Wait status"
+        }
+    }
+
+
 {-| Path to "/save/local" API
 -}
 localPath : String

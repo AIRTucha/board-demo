@@ -1,7 +1,7 @@
 {
   "name": "board-demos",
   "version": "1.0.0",
-  "description": "Seed project for full-stack Elm application based on Board ",
+  "description": "Demo Example application based on Elm 0.18 and Board framework",
   "main": "local.js",
   "scripts": {
     "start": "nodemon --exec \"npm run back && npm run front && node local.js\"",
