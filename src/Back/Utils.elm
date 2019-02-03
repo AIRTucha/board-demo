@@ -1,51 +1,52 @@
 module Back.Utils exposing (..)
 
-import Task
+import Task exposing (map, Task)
 import Maybe exposing (withDefault)
-import Board.File as File exposing(read, dict)
+import Board.File as File exposing(read, dict, fromDict, write)
 import Board.Shared exposing (..)
 import Dict exposing(Dict, insert, member, size)
 import Board.Status exposing (..)
 import Board.Internals exposing (..)
 
 
-{-|
+{-| Server state
 -}
-type alias Model =
+type alias State =
     Dict String String
 
-{-|
+
+{-| Save session to the disc
 -}
-saveSessions : ( Model, a ) -> Task.Task String a
-saveSessions (model, res) =
-    model 
-        |> File.fromDict
-        |> File.write "public/db.json"
-        |> Task.map (\ _ -> res)
+saveSessions : ( State, a ) -> Task String a
+saveSessions (state, res) =
+    state 
+        |> fromDict
+        |> write "public/db.json"
+        |> map (\ _ -> res)
 
 
-{-|
+{-| Load session from the disc
 -}
-getSession : b -> Request a -> Model -> AnswerValue value model error
-getSession param req model =
+getSession : b -> Request a -> State -> AnswerValue value state error
+getSession param req state =
     let 
         sessionTag = 
-            getSessionTag req model
+            getSessionTag req state
         sessionValue = 
-            Dict.get sessionTag model
+            Dict.get sessionTag state
     in
-        (withDefault "No value for your session" sessionValue)
-            |> makeTextResponse req
+        withDefault "No value for your session" sessionValue
+            |> makeStringResponse req
             |> Reply
         
 
-{-|
+{-| Path handler, save session to provided storage and return appropriate response 
 -}
-putSession : b -> Request String -> Model -> ( Model, AnswerValue a model error )
-putSession param req model =
+postSession : b -> Request String -> State -> ( State, AnswerValue a state error )
+postSession param req state =
     let 
         sessionTag = 
-            getSessionTag req model
+            getSessionTag req state
     in
         case req.content of 
             Board.Shared.Data _ file ->    
@@ -53,38 +54,38 @@ putSession param req model =
                     newValue = file <| File.string File.ASCII
                 in
                     (
-                        insert sessionTag newValue model, 
+                        insert sessionTag newValue state, 
                         newValue
-                            |> makeTextResponse req 
+                            |> makeStringResponse req 
                             |> addCookeis "session" sessionTag
                             |> Reply
                     )
             _ ->
                 (
-                    model,
-                    Reply <| makeTextResponse req "something went wrong"
+                    state,
+                    Reply <| makeStringResponse req "something went wrong"
                 )
 
 
-{-|
+{-| Extract existing session tag from state or create new one
 -}    
-getSessionTag : Request a -> Model -> String
-getSessionTag req model =
+getSessionTag : Request a -> State -> String
+getSessionTag req state =
     case Dict.get "session" req.cookies of
         Just oldSessionTag ->
             oldSessionTag
 
         Nothing ->
-            (Basics.toString req.time) ++ "-" ++ (Basics.toString <| size model)
+            (Basics.toString req.time) ++ "-" ++ (Basics.toString <| size state)
 
 
-{-|
+{-| Add new cookei value to provided Response
 -}
 addCookeis : String -> String -> Response a -> Response a
 addCookeis name value res =
     let 
-        cookei str = 
-            { value = str
+        cookei = 
+            { value = value
             , httpOnly = False
             , secure = False 
             , lifetime = Just <| 24*60*60*1000
@@ -94,13 +95,13 @@ addCookeis name value res =
     in
         { res 
         | cookeis = res.cookeis
-            |> insert name (cookei value) 
+            |> insert name cookei
         }
 
 
-{-|
+{-| Path handler, load file from disk in according to specified url
 -}
-getFile : String -> ( b, Request a ) -> Task.Task String (AnswerValue value model error)
+getFile : String -> ( b, Request a ) -> Task String (AnswerValue value state error)
 getFile path (param, req)  =
     let 
         res = getResponse req
@@ -113,14 +114,14 @@ getFile path (param, req)  =
     in
         path
             |> read
-            |> Task.map makeResponse
-            |> Task.map Reply
+            |> map makeResponse
+            |> map Reply
 
 
-{-|
+{-| Construct Repsonse with a text body for provided Request and String
 -}
-makeTextResponse : Request a -> String -> Response b
-makeTextResponse req text = 
+makeStringResponse : Request a -> String -> Response b
+makeStringResponse req text = 
     let 
         res = getResponse req
     in

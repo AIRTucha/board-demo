@@ -7,7 +7,7 @@ import List exposing (map, map2)
 import Front.Utils exposing(..)
 
 
-{-|
+{-| Elm program definition
 -}
 main : Program Never Model Msg
 main =
@@ -30,123 +30,121 @@ main =
 
 
 
-{-|
+{-| Define the application state
 -}
 type alias Model =
-  { local: Entry 
-  , db: Entry
-  }
+    { local: Entry 
+    , db: Entry
+    }
 
 
-{-|
+{-| Define state for single component of the app
 -}
 type alias Entry =
-  { input: String 
-  , value: String
-  }
+    { input: String 
+    , value: String
+    }
 
 
-{-|
+{-| Initial state of the application
 -}
 model : Model
 model =
-  { local = 
-    { input = ""
-    , value = "Wait status"
+    { local = 
+        { input = ""
+        , value = "Wait status"
+        }
+    , db =
+        { input = ""
+        , value = "Wait status"
+        }
     }
-  , db =
-    { input = ""
-    , value = "Wait status"
-    }
-  }
 
 
-{-|
+{-| Internal msg of the application life circle
 -}
 type Msg
-  = HandleLocalInput String
-  | HandleLocalResponse String
-  | HandleDBInput String
-  | HandleDBResponse String
-  | Send (String -> Msg) (Http.Request String) 
+    = HandleLocalInput String
+    | HandleLocalResponse String
+    | HandleDBInput String
+    | HandleDBResponse String
+    | Send (String -> Msg) (Http.Request String) 
 
 
-{-|
+{-| Handle the application life circle
 -}
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-  case msg of
-    HandleLocalInput input ->
-      (
-        { model
-        | local = 
-            { value = model.local.value
-            , input = input
+    case msg of
+        HandleLocalInput input ->
+            ( { model
+                | local = 
+                    { value = model.local.value
+                    , input = input
+                    }
+              }
+            , Cmd.none
+            )
+        
+        HandleLocalResponse value ->
+            ( { model
+                |  local = 
+                    { value = value
+                    , input = model.local.input
+                    }   
+              }
+            , Cmd.none
+            )
+    
+        HandleDBInput input ->
+            ( { model
+                | db = 
+                    { value = model.db.value
+                    , input = input
+                    }
             }
-        }
-        , 
-        Cmd.none
-      )
-    
-    HandleLocalResponse value ->
-      (
-        { model
-        | local = 
-          { value = value
-          , input = model.local.input
-          }
-        }
-        , 
-        Cmd.none
-      )
-    
-    HandleDBInput input ->
-      (
-        { model
-        | db = 
-            { value = model.db.value
-            , input = input
+            , Cmd.none
+            )
+        
+        HandleDBResponse value ->
+            ( { model
+                | db = 
+                    { value = value
+                    , input = model.db.input
+                    }
             }
-        }
-        , 
-        Cmd.none
-      )
-    
-    HandleDBResponse value ->
-      (
-        { model
-        | db = 
-          { value = value
-          , input = model.db.input
-          }
-        }
-        , 
-        Cmd.none
-      )
+            , Cmd.none
+            )
 
-    Send handler req  ->
-      (model, send (handleSession handler) req )
+        Send handler req  ->
+            let 
+                sessionHandler = 
+                    handleSession handler
+            in 
+                ( model
+                , send sessionHandler req
+                )
 
 
-{-|
+{-| View function 
 -}
 view : Model -> Html Msg
 view model =
-  let 
-    save =
-      postSession << Send
-    saveLocal = 
-      save HandleLocalResponse model.local.input localPath
-    saveDB =
-      save HandleDBResponse model.db.input dbPath
-  in
-    div [ ]
-        [ h2 [] [ text "Board demo application" ]
-        , table [ ]
-            [ makeRow HandleLocalInput saveLocal model.local.value
-            , makeRow HandleDBInput saveDB model.db.value
+    let 
+        save =
+            postSession << Send
+        saveLocal = 
+            save HandleLocalResponse model.local.input localPath
+        saveDB =
+            save HandleDBResponse model.db.input dbPath
+    in
+        div [ ]
+            [ h2 [] [ text "Board demo application" ]
+            , table [ ]
+                [ makeRow HandleLocalInput saveLocal model.local.value
+                , makeRow HandleDBInput saveDB model.db.value
+                ]
             ]
-        ]
 
 
 

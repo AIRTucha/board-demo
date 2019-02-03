@@ -1,40 +1,35 @@
 module Front.Utils exposing (..)
 
-import Result
-import Debug exposing (log)
+import Result exposing (withDefault)
 import Html exposing (Html, input, tr, th, text, button)
 import Html.Events exposing (onInput, onClick)
 import Http exposing (request, expectString, stringBody)
 
 
-{-|
+{-| Path to "/save/local" API
 -}
 localPath : String
 localPath =
   "/save/local"
 
 
-{-|
+{-| Path to "/save/db" API
 -}
 dbPath : String
 dbPath =
   "/save/db"
 
 
-{-|
+{-| Process Result with handler, fallback to "No session" for Error value
 -}
 handleSession : (String -> a) -> Result b String -> a
 handleSession hanlder result =
-  case result of 
-    Ok str ->
-      hanlder str
-
-    Err msg ->
-      log "msg" msg
-        |> \_ -> hanlder "No session"
+    result
+        |> withDefault "No session"
+        |> hanlder
 
 
-{-|
+{-| Create row component, which is the key part of UI
 -}
 makeRow : (String -> msg) -> msg -> String -> Html msg
 makeRow handleInput saveInput value =
@@ -45,7 +40,7 @@ makeRow handleInput saveInput value =
     ]
 
 
-{-|
+{-| Prepare Request for text and tag it with handler
 -}
 postSession : (Http.Request String -> a) -> String -> String -> a
 postSession handler str url  =
@@ -61,7 +56,7 @@ postSession handler str url  =
       |> handler
 
 
-{-|
+{-| Apply fst and snd values of tuple as function args
 -}
 spreadTuple: (a -> b -> c) -> (a, b) -> c
 spreadTuple fun (handler, task) =
