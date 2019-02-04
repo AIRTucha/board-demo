@@ -4,7 +4,7 @@ import Task exposing (map, andThen, succeed, onError, Task)
 import Maybe exposing (withDefault)
 import Board.File as File exposing(read, dict)
 import Pathfinder exposing (..)
-import Board exposing (..)
+import Board exposing (program)
 import Board.Router exposing (..)
 import Board.Shared exposing (..)
 import Dict exposing(Dict, insert, member, size)
@@ -59,7 +59,7 @@ port subPort : (String -> msg) -> Sub msg
 {-| Define server program
 -}
 main : Program Never State (Msg String State String)
-main = board router config subPort
+main = program router config subPort
 
 
 {-| Router describes relationships between paths and request handlers
